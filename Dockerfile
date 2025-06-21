@@ -17,4 +17,4 @@ COPY . .
 RUN npm install
 
 # Start app
-CMD ["node", "index.js"]
+CMD ["node", "server.js"]
