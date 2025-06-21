@@ -1,5 +1,5 @@
 const { YtDlp } = require("ytdlp-nodejs");
-
+const path = require("path");
 const ytdlp = new YtDlp();
 
 const YouTubeController = {
@@ -7,9 +7,17 @@ const YouTubeController = {
     const { url } = req.body;
 
     try {
-      const info = await ytdlp.getInfoAsync(url);
+      const cmdOptions = [
+        url,
+        "--dump-json",
+        "--no-warnings",
+        "--no-call-home",
+        "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+        "--cookies", "cookies.txt", // ✅ optional, if you include cookies.txt
+      ];
 
-      console.log(info.formats, "get the info format url");
+      const rawJson = await ytdlp.execAsync(cmdOptions);
+      const info = JSON.parse(rawJson); // this replaces getInfoAsync()
 
       const formats = info.formats
         .filter(
