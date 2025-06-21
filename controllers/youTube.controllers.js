@@ -17,7 +17,10 @@ const YouTubeController = {
       ];
 
       const rawJson = await ytdlp.execAsync(cmdOptions);
+      console.log(rawJson, "rawJson");
+      
       const info = JSON.parse(rawJson); // this replaces getInfoAsync()
+      console.log(info, "info");
 
       const formats = info.formats
         .filter(
