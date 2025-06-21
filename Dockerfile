@@ -8,7 +8,7 @@ RUN apt-get update && \
     chmod a+rx /usr/local/bin/yt-dlp
 
 # Set working directory
-WORKDIR /app
+WORKDIR /
 
 # Copy app files
 COPY . .
