@@ -1,10 +1,17 @@
 const { YtDlp } = require("ytdlp-nodejs");
 const path = require("path");
+const fs = require("fs");
 const ytdlp = new YtDlp();
 
 const YouTubeController = {
   async getUrl(req, res) {
     const { url } = req.body;
+
+    const cookiesPath = path.resolve(__dirname, "../cookies.txt");
+    if (!fs.existsSync(cookiesPath)) {
+      console.error("cookies.txt file not found");
+      return res.status(500).json({ error: "Missing cookies.txt file" });
+    }
 
     try {
       const cmdOptions = [
@@ -13,14 +20,11 @@ const YouTubeController = {
         "--no-warnings",
         "--no-call-home",
         "--user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-        "--cookies", "cookies.txt", // ✅ optional, if you include cookies.txt
+        "--cookies", cookiesPath,
       ];
 
       const rawJson = await ytdlp.execAsync(cmdOptions);
-      console.log(rawJson, "rawJson");
-      
-      const info = JSON.parse(rawJson); // this replaces getInfoAsync()
-      console.log(info, "info");
+      const info = JSON.parse(rawJson);
 
       const formats = info.formats
         .filter(
@@ -37,18 +41,17 @@ const YouTubeController = {
           filesize: f.filesize || null,
         }));
 
-      const response = {
+      res.json({
         id: info.id,
         title: info.title,
         thumbnail: info.thumbnail,
         formats,
         url,
-      };
+      });
 
-      res.json(response);
     } catch (err) {
-      console.error("Failed to get info:", err);
-      res.status(500).json({ error: "Failed to fetch video info" });
+      console.error("Failed to get info:", err?.stderr || err.message);
+      res.status(500).json({ error: "Failed to fetch video info", details: err.message });
     }
   },
 };
